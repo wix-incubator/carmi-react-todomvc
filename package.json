@@ -25,7 +25,7 @@
     "not op_mini all"
   ],
   "devDependencies": {
-    "carmi": "^0.1.48",
-    "carmi-react": "^0.0.7"
+    "carmi": "^0.1.49",
+    "carmi-react": "^0.0.8"
   }
 }
