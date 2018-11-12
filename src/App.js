@@ -5,18 +5,7 @@ import model from './model';
 import carmiReact from 'carmi-react';
 
 const ENTER_KEY = 13;
-function stopEditing(id, value) {
-  this.$startBatch();
-  value = value || '';
-  value = value.trim();
-  if (value === '') {
-    this.spliceItems(this.todosIndexById[id], 1);
-  } else {
-    this.setTitle(this.todosIndexById[id], value);
-  }
-  this.setEditing(id);
-  this.$endBatch();
-}
+
 const { Provider, funcLib } = carmiReact({});
 
 class App extends Component {
@@ -40,7 +29,18 @@ class App extends Component {
         updateEditing: function(id, evt) {
           this.setEditing(id, evt.target.value);
         },
-        stopEditing: stopEditing,
+        stopEditing: function stopEditing(id, value) {
+          this.$startBatch();
+          value = value || '';
+          value = value.trim();
+          if (value === '') {
+            this.spliceItems(this.todosIndexById[id], 1);
+          } else {
+            this.setTitle(this.todosIndexById[id], value);
+          }
+          this.setEditing(id);
+          this.$endBatch();
+        },
         editInputKeyPress: function(evt) {
           if (evt.keyCode === ENTER_KEY) {
             evt.preventDefault();
