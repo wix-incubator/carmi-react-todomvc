@@ -1,8 +1,8 @@
 import 'carmi/macro';
 // @carmi
 
-const { root, setter, arg0, ternary, splice, and, or } = require('carmi');
-const { createElement, bind } = require('carmi/jsx');
+const { root, setter, arg0, ternary, splice, and, or, bind } = require('carmi');
+const { createElement } = require('carmi/jsx');
 const React = { createElement };
 
 const todos = root.get('todos');
@@ -16,28 +16,33 @@ const isEditing = editing.mapValues(item =>
     .not()
     .not()
 );
-const todosByIdx = todos.keyBy(item => item.get('id')).mapValues((item, id) => (
-  <li key={id} className={ternary(isEditing.get(id), 'editing ', ' ').plus(ternary(item.get('done'), 'completed', ''))}>
-    <div className="view">
+const todosByIdx = todos
+  .keyBy(item => item.get('id'))
+  .mapValues((item, id) => (
+    <li
+      key={id}
+      className={ternary(isEditing.get(id), 'editing ', ' ').plus(ternary(item.get('done'), 'completed', ''))}
+    >
+      <div className="view">
+        <input
+          className="toggle"
+          type="checkbox"
+          checked={item.get('done')}
+          onChange={bind('setDone', id, item.get('done').not())}
+        />
+        <label onDoubleClick={bind('setEditing', id, item.get('title'))}>{item.get('title')}</label>
+        <button className="destroy" onClick={bind('removeItem', id)} />
+      </div>
       <input
-        className="toggle"
-        type="checkbox"
-        checked={item.get('done')}
-        onChange={bind('setDone', id, item.get('done').not())}
+        className="edit"
+        value={or(editing.get(id), '')}
+        onChange={bind('updateEditing', id)}
+        onBlur={bind('stopEditing', id, editing.get(id))}
+        onKeyDown={bind('editInputKeyPress')}
+        autoFocus={isEditing.get(id)}
       />
-      <label onDoubleClick={bind('setEditing', id, item.get('title'))}>{item.get('title')}</label>
-      <button className="destroy" onClick={bind('removeItem', id)} />
-    </div>
-    <input
-      className="edit"
-      value={or(editing.get(id), '')}
-      onChange={bind('updateEditing', id)}
-      onBlur={bind('stopEditing', id, editing.get(id))}
-      onKeyDown={bind('editInputKeyPress')}
-      autoFocus={isEditing.get(id)}
-    />
-  </li>
-));
+    </li>
+  ));
 const currentFilter = root.get('filter');
 const visibleTodos = todos.filter(item =>
   or(

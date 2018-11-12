@@ -5,49 +5,19 @@ import model from './model';
 import carmiReact from 'carmi-react';
 
 const ENTER_KEY = 13;
-function stopEditing(instance, id, value) {
-  instance.$startBatch();
+function stopEditing(id, value) {
+  this.$startBatch();
   value = value || '';
   value = value.trim();
   if (value === '') {
-    instance.spliceItems(instance.todosIndexById[id], 1);
+    this.spliceItems(this.todosIndexById[id], 1);
   } else {
-    instance.setTitle(instance.todosIndexById[id], value);
+    this.setTitle(this.todosIndexById[id], value);
   }
-  instance.setEditing(id);
-  instance.$endBatch();
+  this.setEditing(id);
+  this.$endBatch();
 }
-const { Provider, funcLib } = carmiReact({
-  setDone: (instance, id, value) => instance.setDone(instance.todosIndexById[id], value),
-  removeItem: (instance, id) => instance.spliceItems(instance.todosIndexById[id], 1),
-  updateEditing: (instance, id, evt) => instance.setEditing(id, evt.target.value),
-  stopEditing: stopEditing,
-  editInputKeyPress: (instance, evt) => {
-    if (evt.keyCode === ENTER_KEY) {
-      evt.preventDefault();
-      evt.target.blur();
-    }
-  },
-  setAllDone: (instance, value, evt) => {
-    if (instance.$model.todos.length) {
-      instance.$startBatch();
-      instance.$model.todos.forEach((todo, index) => {
-        instance.setDone(index, !value);
-      });
-      instance.$endBatch();
-    }
-  },
-  newTodoKeyDown: (instance, evt) => {
-    const title = (evt.target.value || '').trim();
-    if (evt.keyCode === ENTER_KEY && title) {
-      const id = '' + new Date().getTime();
-      instance.setItem(instance.$model.todos.length, { id, title, done: false });
-      evt.target.value = '';
-    }
-  },
-  clearDoneItems: instance =>
-    instance.spliceItems.apply(null, [0, instance.$model.todos.length].concat(instance.pendingItems))
-});
+const { Provider, funcLib } = carmiReact({});
 
 class App extends Component {
   constructor(props) {
@@ -58,7 +28,49 @@ class App extends Component {
         editing: {},
         todos: []
       },
-      funcLib
+      {
+        ...funcLib,
+        setDone: function(id, value) {
+          this.setDone(this.todosIndexById[id], value);
+        },
+
+        removeItem: function(id) {
+          this.spliceItems(this.todosIndexById[id], 1);
+        },
+        updateEditing: function(id, evt) {
+          this.setEditing(id, evt.target.value);
+        },
+        stopEditing: stopEditing,
+        editInputKeyPress: function(evt) {
+          if (evt.keyCode === ENTER_KEY) {
+            evt.preventDefault();
+            evt.target.blur();
+          }
+        },
+        setAllDone: function(value, evt) {
+          if (this.$model.todos.length) {
+            this.$startBatch();
+            this.$model.todos.forEach((todo, index) => {
+              this.setDone(index, !value);
+            });
+            this.$endBatch();
+          }
+        },
+        newTodoKeyDown: function(evt) {
+          const title = (evt.target.value || '').trim();
+          if (evt.keyCode === ENTER_KEY && title) {
+            const id = '' + new Date().getTime();
+            this.setItem(this.$model.todos.length, { id, title, done: false });
+            evt.target.value = '';
+          }
+        },
+        clearDoneItems: function() {
+          this.spliceItems.apply(null, [0, this.$model.todos.length].concat(this.pendingItems));
+        },
+        setFilter: function(newFilter) {
+          this.setFilter(newFilter);
+        }
+      }
     );
   }
   render() {
